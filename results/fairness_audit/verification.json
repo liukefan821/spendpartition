@@ -1,0 +1,15 @@
+{
+  "seed": 24301,
+  "trace_rows": 352,
+  "agent_rows": 66,
+  "summary_rows": 22,
+  "csv_sha256": {
+    "fairness_trace.csv": "39b85573a568a03d9d9407a49af42c508a3b31bdf7c533e1f5ee33de80b0c9bd",
+    "fairness_agents.csv": "7a3a33888f2548c7a87c2a90cb5a6bfa23b76ccb54cd5829b6582949358670a7",
+    "fairness.csv": "a3e703e2fec1c7beb5cc7a5f89b952c2fd5f417262cd2c5109bdf9a1ed65526d"
+  },
+  "csv_runs_byte_identical": true,
+  "original_rho_sweep_rows_matched": 33,
+  "protected_files_unchanged": true,
+  "creation_and_runtime_bytecode_unchanged": true
+}
