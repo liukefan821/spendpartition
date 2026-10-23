@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "checked_at_utc": "2026-10-22T16:00:33.341763+00:00",
+  "baseline_commit": "f4f471653f93336979f85963222225be8767e283",
+  "fetched_origin_main": "f4f471653f93336979f85963222225be8767e283",
+  "branch": "feat/hehu-fairness",
+  "measurement_environment": "Local Foundry EVM; no public-testnet measurements",
+  "working_tree": {
+    "status": "PASS",
+    "full_suite": {
+      "suites": 33,
+      "passed": 111,
+      "failed": 0,
+      "skipped": 0
+    },
+    "fairness_test": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python_unit_tests": {
+      "passed": 14
+    },
+    "commands": [
+      {
+        "check": "build",
+        "command": "forge build",
+        "exit_code": 0
+      },
+      {
+        "check": "full-suite",
+        "command": "forge test",
+        "exit_code": 0
+      },
+      {
+        "check": "fairness-suite",
+        "command": "forge test --match-contract FairnessTest -vv",
+        "exit_code": 0
+      },
+      {
+        "check": "metric-tests",
+        "command": "python -m unittest discover -s analysis -p test_fairness.py -v",
+        "exit_code": 0
+      },
+      {
+        "check": "analysis",
+        "command": "python analysis/fairness.py",
+        "exit_code": 0
+      },
+      {
+        "check": "plot-only",
+        "command": "python analysis/fairness.py --plot-only",
+        "exit_code": 0
+      },
+      {
+        "check": "reproducibility",
+        "command": "python analysis/check_fairness_repro.py",
+        "exit_code": 0
+      }
+    ]
+  },
+  "clean_source_snapshot": {
+    "status": "PASS",
+    "full_suite": {
+      "suites": 33,
+      "passed": 111,
+      "failed": 0,
+      "skipped": 0
+    },
+    "fairness_test": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python_unit_tests": {
+      "passed": 14
+    },
+    "commands": [
+      {
+        "check": "build",
+        "command": "forge build",
+        "exit_code": 0
+      },
+      {
+        "check": "full-suite",
+        "command": "forge test",
+        "exit_code": 0
+      },
+      {
+        "check": "fairness-suite",
+        "command": "forge test --match-contract FairnessTest -vv",
+        "exit_code": 0
+      },
+      {
+        "check": "metric-tests",
+        "command": "python -m unittest discover -s analysis -p test_fairness.py -v",
+        "exit_code": 0
+      },
+      {
+        "check": "analysis",
+        "command": "python analysis/fairness.py",
+        "exit_code": 0
+      },
+      {
+        "check": "plot-only",
+        "command": "python analysis/fairness.py --plot-only",
+        "exit_code": 0
+      },
+      {
+        "check": "reproducibility",
+        "command": "python analysis/check_fairness_repro.py",
+        "exit_code": 0
+      }
+    ]
+  },
+  "clean_snapshot_scope": {
+    "source": "HEAD plus proposed fairness files",
+    "dependencies": "All locked recursive submodule sources",
+    "initial_foundry_out_and_cache": "Absent",
+    "python_environment": "Existing pinned Python 3.12.14 environment reused",
+    "fresh_python_dependency_installation": "NOT CHECKED",
+    "independent_final_integrated_commit_reproduction": "NOT CHECKED; assigned separately to Ruiqi"
+  },
+  "cross_environment_csv_byte_equality": "PASS",
+  "csv_reproducibility": {
+    "seed": 24301,
+    "trace_rows": 352,
+    "agent_rows": 66,
+    "summary_rows": 22,
+    "csv_sha256": {
+      "fairness_trace.csv": "39b85573a568a03d9d9407a49af42c508a3b31bdf7c533e1f5ee33de80b0c9bd",
+      "fairness_agents.csv": "7a3a33888f2548c7a87c2a90cb5a6bfa23b76ccb54cd5829b6582949358670a7",
+      "fairness.csv": "a3e703e2fec1c7beb5cc7a5f89b952c2fd5f417262cd2c5109bdf9a1ed65526d"
+    },
+    "csv_runs_byte_identical": true,
+    "original_rho_sweep_rows_matched": 33,
+    "protected_files_unchanged": true,
+    "creation_and_runtime_bytecode_unchanged": true
+  },
+  "protected_files_and_full_creation_and_runtime_template_hashes": "PASS",
+  "tracked_regular_files_compared": 76,
+  "existing_tracked_files_changed": [
+    ".gitignore"
+  ],
+  "remote_conflict_check": {
+    "status": "PASS",
+    "ahead": 0,
+    "behind": 0,
+    "overlapping_remote_changes": []
+  },
+  "resolved_clean_snapshot_issue": {
+    "initial_status": "FAIL",
+    "cause": "The initial hand-assembled snapshot omitted OpenZeppelin recursive submodule sources, changing autodetected compiler remappings and metadata hashes. Executable bytes excluding metadata were identical.",
+    "resolution": "Restored exact recursive submodule source revisions, removed disposable build output and cache, and reran all seven commands. Full bytecode hashes now match without changing protected configuration or reference hashes.",
+    "final_status": "PASS"
+  },
+  "independent_data_and_document_checks": {
+    "english_and_identifier_scan": "PASS",
+    "relative_links_checked": 10,
+    "broken_or_unselected_relative_targets": 0,
+    "trace_rows": 352,
+    "agent_rows_independently_recomputed": 66,
+    "configuration_rows_independently_recomputed": 22,
+    "report_table_rows_checked": 11,
+    "plot_points_checked": 66,
+    "chinese_audit_paths_ignored": true
+  },
+  "analysis_dependency_pins_match": "PASS",
+  "portability_and_private_information_review": "PASS; dynamic repository root and portable Forge lookup; no user-specific absolute paths, credentials or local environment files included"
+}

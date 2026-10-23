@@ -6,3 +6,15 @@ results/*.png
 .DS_Store
 docs/reference/
 results/*.txt
+__pycache__/
+.venv-fairness/
+# Fairness measurements are review artifacts; keep only these generated root outputs visible.
+!results/fairness_trace.csv
+!results/fairness_agents.csv
+!results/fairness.csv
+!results/fairness.png
+# Keep local fairness audits private; expose only the English reproduction evidence.
+results/fairness_audit/*
+!results/fairness_audit/environment.json
+!results/fairness_audit/verification.json
+!results/fairness_audit/final-verification.json
