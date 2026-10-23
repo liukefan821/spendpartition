@@ -1,13 +1,13 @@
-# SpendPartition — implementation skeleton
+# SpendPartition
 
 One parameterised Solidity contract: a principal budget `B_G` per time window shared by `N`
 registered delegates. Delegate `i` holds a reservation `r_i`; `S = B_G - R` is a shared surplus;
 `rho = rhoNum / rhoDen` sets the split. `rho = 1` is a static partition, `rho = 0` a shared pool,
 `0 < rho < 1` a reserved pool.
 
-This tree covers the payment contract, the fixed-scenario and property tests, a rho sweep and a
-gas sweep. It is the feasibility spike attached to the BYOP approval request, not the full build;
-"Not implemented yet" at the bottom lists what the Layout v1.1 checklist still asks for.
+This repository contains the payment contract, its tests and analysis, the weighted extension,
+the Sepolia deployment record and the dashboard. "Scope and limitations" at the bottom lists what
+is out of scope by design.
 
 ## Source of truth
 
@@ -112,7 +112,7 @@ configuration: in `SpendPartitionReference.pay`, replace the `fromReservation` l
 
 ## Mutation checks
 
-`test/mutants/` holds three copies of the optimised contract, each generated from
+`test/mutants/` holds four copies of the optimised contract, each generated from
 `src/SpendPartition.sol` with one behaviour changed and the change marked by a `MUTATION` comment:
 
 | Mutant | Change |
@@ -393,7 +393,18 @@ Foundry versions.
 - The per-delegation-cap baseline is modelled on the same code path as `rho = 1` with
   `B_G = sum of the individual caps`; each delegate then has an independent counter and `S = 0`.
 
-## Not implemented yet
+## How we used AI
+
+- **Guided:** the frozen documents in `docs/frozen/` were the AI agent's requirements; changing
+  behaviour meant changing those documents first.
+- **Checked:** a team member who did not write the code re-ran the tests and results from a fresh
+  clone (`docs/reproducibility.md`); the differential and mutation tests check the contract itself.
+- **Changed after review:** AI-drafted presentation text said each delegate's floor was "ρ of the
+  budget", which suggests every delegate gets ρ·B; we corrected it to ρ·B in total, split evenly.
+  AI-drafted narration said "nothing can change after deployment"; we corrected it, because every
+  payment updates the spending records, and only the settings and delegate list are fixed.
+
+## Scope and limitations
 
 The Layout v1.1 Part 7 checklist is closed: reference implementation and differential harness,
 mutation checks, adversarial token mocks, the three surplus write regimes, the hybrid spill case,
