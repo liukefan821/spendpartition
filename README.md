@@ -43,17 +43,28 @@ forge test                       # whole suite
 forge test --match-contract ScenariosTest -vv
 ```
 
-| File | Covers |
-|---|---|
-| `test/Scenarios.t.sol` | per-delegation caps exceeding the intended aggregate; a static split rejecting a request the aggregate could serve; shared-pool endpoints; T6, T7, T9, T12 (both cases), T13 (both appendix variants), T5/T11, T16, T17; constructor bounds; slot packing; G1/G2 storage-access counts |
-| `test/Fuzz.t.sol` | T8 apportionment via the characterising inequality (`R * rhoDen <= B_G * rhoNum < (R + 1) * rhoDen`), T18 debit-order transition |
-| `test/Invariant.t.sol` | I1, I3, I4, ghost agreement, the T2 probe (snapshot → real entry point → revert), and handler-side checks for T5, T16, T18, I2 across six configurations |
-| `test/RhoSweep.t.sol` | T14 measurement, writes `results/rho_sweep.csv` |
-| `test/ReferenceAnchors.t.sol` | the Appendix A traces (T6, T7, T12, T13, T5/T11, T9, T17) replayed against `SpendPartitionReference` |
-| `test/Differential.t.sol` | both implementations driven through one call sequence and compared after every call, across five configurations |
-| `test/Mutation.t.sol` | the four mutants in `test/mutants/` run against the named checks, with the resulting kill matrix printed |
-| `test/AdversarialToken.t.sol` | tokens that call back during the transfer, revert, or return false |
-| `test/DemoTrace.t.sol` | replays the six demo acts against the contract and writes `results/demo_trace.csv` |
+| File | Tests | Covers |
+|---|---|---|
+| `test/Scenarios.t.sol` | 19 | per-delegation caps exceeding the intended aggregate; a static split rejecting a request the aggregate could serve; shared-pool endpoints; T6, T7, T9, T12 (both cases), T13 (both appendix variants), T5/T11, T16, T17; constructor bounds; slot packing; G1/G2 storage-access counts |
+| `test/Fuzz.t.sol` | 3 | T8 apportionment via the characterising inequality (`R * rhoDen <= B_G * rhoNum < (R + 1) * rhoDen`), T18 debit-order transition |
+| `test/Invariant.t.sol` | 6 (6 suites) | I1, I3, I4, ghost agreement, the T2 probe (snapshot → real entry point → revert), and handler-side checks for T5, T16, T18, I2 across six configurations |
+| `test/RhoSweep.t.sol` | 1 | T14 measurement, writes `results/rho_sweep.csv` |
+| `test/ReferenceAnchors.t.sol` | 10 | the Appendix A traces (T6, T7, T12, T13, T5/T11, T9, T17) replayed against `SpendPartitionReference` |
+| `test/Differential.t.sol` | 5 (5 suites) | both implementations driven through one call sequence and compared after every call, across five configurations |
+| `test/Mutation.t.sol` | 1 | the four mutants in `test/mutants/` run against the named checks, with the resulting kill matrix printed |
+| `test/AdversarialToken.t.sol` | 7 | tokens that call back during the transfer, revert, or return false |
+| `test/DemoTrace.t.sol` | 1 | replays the six demo acts against the contract and writes `results/demo_trace.csv` |
+| `test/WeightedScenarios.t.sol` | 17 | weighted constructor and payment scenarios against `SpendPartitionWeighted`: equal, unequal and zero weights, remainder ties broken by registration index, both rho endpoints, invalid weight arrays, full-precision budgets |
+| `test/WeightedFuzz.t.sol` | 6 | allocation properties P1–P6 (conservation, quota floor/ceiling, equal weights matching `SpendPartition`, determinism, zero-weight surplus spending, own-weight monotonicity) |
+| `test/WeightedInvariant.t.sol` | 5 (5 suites) | I1–I5 on the weighted contract with a ghost spend ledger, across five weight/rho configurations |
+| `test/WeightedReferenceAnchors.t.sol` | 20 | hand-calculated anchors replayed against `SpendPartitionWeightedReference` |
+| `test/WeightedDifferential.t.sol` | 5 (5 suites) | weighted optimised and weighted reference driven through one call sequence and compared after every call, across five configurations |
+| `test/WeightedStorageAudit.t.sol` | 4 | storage writes on the weighted payment path: one write to the packed agent slot on a reservation-only payment, and no write to the reservation slot in the audited payments |
+| `test/Fairness.t.sol` | 1 | the fairness measurement: 352 real payment attempts, writes `results/fairness_trace.csv` |
+
+`forge test` on this tree (Foundry 1.8.4, run 2026-10-23): 111 tests in 33 test suites passed, 0 failed,
+0 skipped. That is 53 in the nine base-contract files, 57 in the six `Weighted*` files and 1 in
+`Fairness.t.sol`.
 
 Seeds and campaign sizes live in `foundry.toml`: fuzz seed `0x5eed`, fuzz runs 1000 (256 for T8),
 invariant runs 64 × depth 128, `fail_on_revert = false` (a rejected payment is a valid outcome).
@@ -130,7 +141,7 @@ R1 one call one payment     1        1   1   1   0
 ```
 
 Each mutant is caught, and M1, M2 and M4 are each caught by exactly one check: drop the T18, the
-T5/T9 or the R1 property and that mutant goes through the other 51 tests untouched. To see how far a
+T5/T9 or the R1 property and that mutant goes through the other 110 tests untouched. To see how far a
 mutant is from the original, `diff src/SpendPartition.sol test/mutants/MutantM2NoWindowTag.sol`.
 
 M4 took two attempts to catch, and the reason is worth recording. A token that calls `pay` on its own
@@ -267,12 +278,84 @@ with a curve against N. The front end only renders: every number was read back f
 or taken from a transaction receipt, and none of the rules are reimplemented in JavaScript. Rebuild
 it whenever the CSVs change.
 
+## Extensions
+
+### Weighted allocations
+
+`src/SpendPartitionWeighted.sol` replaces the equal split of the reserved total `R` with integer
+weights fixed at deployment, apportioned by largest remainder (Hamilton) with ties broken by
+registration index; equal weights reproduce the baseline reservations. `src/SpendPartitionWeightedReference.sol`
+is an independently structured second implementation for the differential harness.
+`src/SpendPartition.sol` is unchanged. Spec, design and write-up are in `docs/extensions/`
+(`WeightedAllocationSpec.md`, `WeightedImplementationDesign.md`, `WeightedAllocationReportDraft.md`).
+
+Tests: `test/WeightedScenarios.t.sol`, `test/WeightedFuzz.t.sol`, `test/WeightedInvariant.t.sol`,
+`test/WeightedReferenceAnchors.t.sol`, `test/WeightedDifferential.t.sol`,
+`test/WeightedStorageAudit.t.sol` (57 tests; counts in the table under Tests).
+
+```bash
+forge test --match-path "test/Weighted*.t.sol"
+./run_weighted_gas_sweep.sh                    # PORT=... if 18545 is taken
+python3 analysis/weighted_gas_analysis.py      # offline; rebuilds the memo, its CSV and both figures
+```
+
+`run_weighted_gas_sweep.sh` refuses to run unless `forge`, `cast` and `anvil` all report 1.8.4, and
+refuses a port that already has a chain. It writes `results/weighted_gas_sweep.csv`,
+`results/weighted_gas_summary.csv` and `results/weighted_gas_environment.json`; the baseline
+broadcasts and results are not touched. The analysis is in `results/weighted_gas_analysis.md`: fixed
+payments on the weighted contract cost 1,742 gas more than the baseline at every N and every weight
+profile (48,865 against 47,123 reservation only, 54,379 against 52,637 from surplus), and deployment
+grows faster with N (3,885,608–4,066,258 against 1,998,732 at N = 50, depending on the profile).
+
+## Fairness evaluation
+
+`test/Fairness.t.sol` deploys a fresh contract for each rho in {0, 0.1, …, 1} under two fixed request
+orderings (22 deployments, 352 real payment attempts, three delegates) and writes every outcome to
+`results/fairness_trace.csv`. `analysis/fairness.py` aggregates the trace into
+`results/fairness_agents.csv` and `results/fairness.csv` and draws `results/fairness.png` (and
+`results/fairness.pdf`). The write-up, metric definitions and limitations are in
+`docs/hehu_fairness_section.md`. In the adversarial ordering, all six honest requests are refused at
+rho = 0 and 0.1 and none from rho = 0.8 to 1.
+
+```bash
+python3.12 -m venv .venv-fairness
+source .venv-fairness/bin/activate
+python -m pip install -r analysis/requirements-fairness.txt
+
+forge test                                                  # full suite first: the checker needs rho_sweep.csv and build artifacts
+forge test --match-contract '^FairnessTest$' -vv            # overwrites results/fairness_trace.csv
+python analysis/fairness.py                                 # derived CSVs and both figures
+python analysis/fairness.py --plot-only                     # figures only, from fairness.csv
+python -m unittest discover -s analysis -p 'test_fairness.py' -v   # 14 metric unit tests
+python analysis/check_fairness_repro.py                     # two fresh runs, CSVs compared byte for byte
+```
+
+Every `forge test` run rewrites `results/fairness_trace.csv`, which is tracked; the run of 2026-10-23
+reproduced the committed file byte for byte apart from line endings.
+
+## Public testnet
+
+`docs/testnet/sepolia_deployment.md` records a replay of demo acts 1–5 on the Sepolia testnet (chain
+id 11155111), matching `test/DemoTrace.t.sol` step for step, including the revert arguments of every
+refused payment: the token and five act contracts, all source-verified on Etherscan, every scene
+transaction with its explorer link, and the commands used. Act 6 is not replayed. Keys are read from
+a git-ignored `.env`; `.env.example` lists the variables.
+
+Testnet gas is recorded there but is not used in place of the local gas table: the gas numbers in this
+README are local measurements. Deployment on Sepolia used 5,296,856–5,296,880 gas against
+800,116–800,128 locally for the same bytecode.
+
 ## Reference outputs
 
 `results/container_2026-09-30/` holds a full run (environment in `env.txt`): 52 tests passed,
 0 failed; the gas CSV and its three stdout tables, the rho sweep, the invariant and differential
 coverage, and both figures. `results/container_2026-09-22/` is kept as the snapshot the proposal
 quotes; its gas CSV predates the reference and rollover phases and uses the earlier column set.
+
+The 2026-09-30 reference run predates the extensions: it has none of the `Weighted*` or `Fairness`
+suites, the weighted gas sweep, the fairness outputs or the Sepolia replay, so its 52 tests are not
+the current total (111, see Tests). The weighted gas sweep uses it as the baseline control: 17
+equivalent baseline rows of `results/weighted_gas_sweep.csv` match it exactly.
 
 Reproduction check — payment gas and deployment gas are fixed by the bytecode and the EVM rules,
 both pinned here, so a local run should match column for column:
