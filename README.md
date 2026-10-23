@@ -348,8 +348,11 @@ README are local measurements. Deployment on Sepolia used 5,296,856–5,296,880 
 ## Reference outputs
 
 `results/container_2026-09-30/` holds a full run (environment in `env.txt`): 52 tests passed,
-0 failed; the gas CSV and its three stdout tables, the rho sweep, the invariant and differential
-coverage, and both figures. `results/container_2026-09-22/` is kept as the snapshot the proposal
+0 failed (`forge_test_summary.txt`); the gas CSV and its three stdout tables (`gas_sweep.csv`,
+`gas_sweep_tables.txt`), the batching results (`batching.csv`), and both figures (`gas_vs_N.png`,
+`gas_regimes.png`). It holds no rho sweep and no invariant or differential coverage; the rho sweep
+reference is the 2026-09-22 copy, `results/container_2026-09-22/rho_sweep.csv`.
+`results/container_2026-09-22/` is kept as the snapshot the proposal
 quotes; its gas CSV predates the reference and rollover phases and uses the earlier column set.
 
 The 2026-09-30 reference run predates the extensions: it has none of the `Weighted*` or `Fairness`
@@ -364,7 +367,7 @@ both pinned here, so a local run should match column for column:
 cut -d, -f1-9,11-13 results/gas_sweep.csv > /tmp/mine.csv
 cut -d, -f1-9,11-13 results/container_2026-09-30/gas_sweep.csv > /tmp/ref.csv
 diff /tmp/mine.csv /tmp/ref.csv && echo "gas matches reference"
-diff results/rho_sweep.csv results/container_2026-09-30/rho_sweep.csv && echo "rho sweep matches reference"
+diff results/rho_sweep.csv results/container_2026-09-22/rho_sweep.csv && echo "rho sweep matches reference"
 ```
 
 `window_id` (column 10) and `tx_hash` (column 14) are excluded: both depend on when the run happened,

@@ -91,3 +91,32 @@ Nothing was skipped.
   for line-ending reasons only (problem 2). It also rewrites two tracked files: `results/fairness_audit/environment.json`,
   whose `analysis_python` line now records the running interpreter, and `verification.json`, whose content is
   unchanged but which is rewritten with CRLF. `forge test` likewise rewrites `results/fairness_trace.csv`.
+
+## Follow-up
+
+Both findings were fixed on branch `fix/repro-findings`:
+
+- **README, "Reference outputs":** the rho sweep check now compares against
+  `results/container_2026-09-22/rho_sweep.csv`. The description of `results/container_2026-09-30/` now
+  lists what it actually contains.
+- **New `.gitattributes`** containing `* text=auto eol=lf`, so text files are checked out with LF line endings
+  whatever `core.autocrlf` says. `git add --renormalize .` changed no other file, because every committed
+  text file was already LF.
+
+Both checks were re-run on 2026-10-23 in a new fresh clone of the branch, taken before this section was
+added, with default Windows settings (system `core.autocrlf=true`, no override). The clone had no
+working-tree files with CRLF line endings, and `forge test` passed 111 tests with 0 failed and 0 skipped.
+
+```text
+$ python analysis/check_fairness_repro.py
+IDENTICAL fairness_trace.csv: 39b85573a568a03d9d9407a49af42c508a3b31bdf7c533e1f5ee33de80b0c9bd
+IDENTICAL fairness_agents.csv: 7a3a33888f2548c7a87c2a90cb5a6bfa23b76ccb54cd5829b6582949358670a7
+IDENTICAL fairness.csv: a3e703e2fec1c7beb5cc7a5f89b952c2fd5f417262cd2c5109bdf9a1ed65526d
+PASS: 352 attempts; 66 agent rows; 22 configurations; original RhoSweep matches; protected files and bytecode unchanged
+$ diff results/rho_sweep.csv results/container_2026-09-22/rho_sweep.csv && echo "rho sweep matches reference"
+rho sweep matches reference
+```
+
+One behaviour is unchanged: `check_fairness_repro.py` still rewrites `results/fairness_audit/environment.json`,
+whose `analysis_python` line records the running interpreter, and `verification.json`, which comes out with the
+same content. This is how the script records its evidence.
