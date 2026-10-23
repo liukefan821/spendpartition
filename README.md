@@ -141,7 +141,7 @@ R1 one call one payment     1        1   1   1   0
 ```
 
 Each mutant is caught, and M1, M2 and M4 are each caught by exactly one check: drop the T18, the
-T5/T9 or the R1 property and that mutant goes through the other 110 tests untouched. To see how far a
+T5/T9 or the R1 property and that mutant goes through the other 52 tests of the base suite untouched. To see how far a
 mutant is from the original, `diff src/SpendPartition.sol test/mutants/MutantM2NoWindowTag.sol`.
 
 M4 took two attempts to catch, and the reason is worth recording. A token that calls `pay` on its own
@@ -331,7 +331,7 @@ python analysis/check_fairness_repro.py                     # two fresh runs, CS
 ```
 
 Every `forge test` run rewrites `results/fairness_trace.csv`, which is tracked; the run of 2026-10-23
-reproduced the committed file byte for byte apart from line endings.
+reproduced the committed file byte for byte (on a Windows checkout, git may show it as modified only because of CRLF line endings).
 
 ## Public testnet
 
